@@ -23,7 +23,7 @@ const getAllPosts = (req, res) => {
 const getPostById = (req, res) => {
     const id = Number(req.params.id);
     const sql = "SELECT * FROM posts WHERE id = ?";
-    connection.querry(sql, [id], (err, results) => {
+    connection.query(sql, [id], (err, results) => {
         if (err) {
             console.error("Error retrieving post from the database:", err);
             return res.status(500).json({
@@ -37,7 +37,22 @@ const getPostById = (req, res) => {
                 message: "Post not found"
             });
         }
-        res.json(results[0]);
+
+        const sql = "SELECT * FROM post_tag WHERE post_id = ?";
+        connection.query(sql, [id], (err, tags) => {
+            if (err) {
+                console.error("Error retrieving tags from the database:", err);
+                return res.status(500).json({
+                    error: true,
+                    message: "Error retrieving tags from the database"
+                });
+            }
+
+            const post = results[0];
+            post.tags = tags.map(tag => tag.tag_id);
+            res.json(post);
+        });
+
     });
 };
 
