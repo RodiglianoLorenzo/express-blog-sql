@@ -8,8 +8,6 @@ const port = process.env.PORT || 3001;
 
 app.use(express.json());
 
-//console.log(process.env.DB_USER);
-
 
 app.get("/", (req, res) => {
     res.send("working server");
