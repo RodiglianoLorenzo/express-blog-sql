@@ -74,16 +74,28 @@ const patchPost = (req, res) => {
 
 //deletePost per eliminare un post in base all'id, se il post non esiste restituisce un messaggio di errore, altrimenti elimina il post e restituisce una risposta con status 204 (No Content)
 const deletePost = (req, res) => {
+    //
     const id = Number(req.params.id);
-    const index = posts.findIndex((item) => item.id === id);
 
-    if (index === -1) {
-        return res.status(404).json({ message: "Post non trovato" });
-    }
+    const sql = 'DELETE FROM posts WHERE id = ?';
+    connection.query(sql, [id], (err, results) => {
+        if (err) {
+            console.error("Error deleting post from the database:", err);
+            return res.status(500).json({
+                error: true,
+                message: "Error deleting post from the database"
+            });
+        }
+        if (results.affectedRows === 0) {
+            return res.status(404).json({
+                error: true,
+                message: "post not found"
+            })
+        }
 
-    posts.splice(index, 1);
-    console.log("Lista post aggiornata:", posts);
-    res.status(204).send();
+        res.status(204).send();
+    })
+
 };
 
 
