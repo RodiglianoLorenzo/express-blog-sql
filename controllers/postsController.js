@@ -19,16 +19,26 @@ const getAllPosts = (req, res) => {
 
 };
 
-//getPostById per restituire un post in base all'id, se il post non esiste restituisce un messaggio di errore, altrimenti restituisce il post
+//show per restituire un post in base all'id, se il post non esiste restituisce un messaggio di errore, altrimenti restituisce il post
 const getPostById = (req, res) => {
     const id = Number(req.params.id);
-    const post = posts.find((item) => item.id === id);
-
-    if (!post) {
-        return res.status(404).json({ message: "Post non trovato" });
-    }
-
-    res.json(post);
+    const sql = "SELECT * FROM posts WHERE id = ?";
+    connection.querry(sql, [id], (err, results) => {
+        if (err) {
+            console.error("Error retrieving post from the database:", err);
+            return res.status(500).json({
+                error: true,
+                message: "Error retrieving post from the database"
+            })
+        }
+        if (results.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: "Post not found"
+            });
+        }
+        res.json(results[0]);
+    });
 };
 
 //createPost per creare un nuovo post, prende i dati dal body della richiesta e li aggiunge alla lista dei post, restituisce il post creato con status 201 (Created)
